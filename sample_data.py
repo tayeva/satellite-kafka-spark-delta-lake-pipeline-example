@@ -6,7 +6,7 @@ Generator satellite sample data
 
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, Namespace
 from pathlib import Path
-from typing import Dict, Generator
+from typing import Dict, Generator, Tuple
 import logging
 
 from sklearn.preprocessing import MinMaxScaler
@@ -46,7 +46,32 @@ def _command_line_interface() -> Namespace:
     return parser.parse_args()
 
 
-def sample(n_samples: int) -> pd.DataFrame:
+def _min_max_scalar(feature_range: Tuple[int, int], data: np.array) -> np.array:
+    return MinMaxScaler(feature_range=feature_range).fit_transform(data.reshape(-1, 1))[
+        :, 0
+    ]
+
+
+def _random_wave(n_samples: int, start: int, end: int, scalar: float) -> np.array:
+    return np.sin(np.linspace(start, end, n_samples)) + scalar * np.random.randn(
+        n_samples
+    )
+
+
+def _sensor_sample(
+    n_samples: int,
+    feature_range=(-1, 1),
+    start: int = 10,
+    end: int = 100,
+    scalar: float = 0.1,
+) -> np.array:
+    return _min_max_scalar(
+        feature_range=feature_range,
+        data=_random_wave(n_samples=n_samples, start=start, end=end, scalar=scalar),
+    )
+
+
+def sample(n_samples: int, df_round: int = 2) -> pd.DataFrame:
     """
     Create a dataframe of satellite sample data.
 
@@ -55,50 +80,39 @@ def sample(n_samples: int) -> pd.DataFrame:
 
     n_samples - the number of samples to generate
     """
+    # Battery and temperate are dependent
+    temp_batt_sin_start = 0
+    temp_batt_sin_end = np.random.randint(10, 20)
+    temp_batt_scalar = np.random.uniform()
     df = pd.DataFrame()
-    df["temp_c"] = MinMaxScaler(feature_range=(TEMP_LOW, TEMP_HIGH)).fit_transform(
-        (
-            np.sin(np.linspace(0, np.random.randint(10, 20), n_samples))
-            + np.random.uniform() * np.random.randn(n_samples)
-        ).reshape(-1, 1)
-    )[:, 0]
-    df["battery_charge_pct"] = MinMaxScaler(
-        feature_range=(BATTERY_CHARGE_LOW, BATTERY_CHARGE_HIGH)
-    ).fit_transform(
-        (
-            np.sin(np.linspace(0, np.random.randint(10, 20), n_samples))
-            + np.random.uniform() * np.random.randn(n_samples)
-        ).reshape(-1, 1)
-    )[
-        :, 0
-    ]
+    df["temp_c"] = _min_max_scalar(
+        feature_range=(TEMP_LOW, TEMP_HIGH),
+        data=_random_wave(
+            n_samples=n_samples,
+            start=temp_batt_sin_start,
+            end=temp_batt_sin_end,
+            scalar=temp_batt_scalar,
+        ),
+    )
+    df["battery_charge_pct"] = _min_max_scalar(
+        feature_range=(BATTERY_CHARGE_LOW, BATTERY_CHARGE_HIGH),
+        data=_random_wave(
+            n_samples=n_samples,
+            start=temp_batt_sin_start,
+            end=temp_batt_sin_end,
+            scalar=temp_batt_scalar,
+        ),
+    )
     df["altitude"] = np.random.uniform(
         low=ALTIUDE_KM_LOW, high=ALTIUDE_KM_HIGH, size=(n_samples, 1)
     )
-    df["sensor1"] = MinMaxScaler().fit_transform(
-        (
-            np.sin(np.linspace(0, np.random.randint(10, 100), n_samples))
-            + 0.1 * np.random.randn(n_samples)
-        ).reshape(-1, 1)
-    )[:, 0]
-    df["sensor2"] = MinMaxScaler().fit_transform(
-        (
-            np.sin(np.linspace(0, np.random.randint(10, 100), n_samples))
-            + 0.1 * np.random.randn(n_samples)
-        ).reshape(-1, 1)
-    )[:, 0]
-    df["sensor3"] = MinMaxScaler().fit_transform(
-        (
-            np.sin(np.linspace(0, np.random.randint(10, 100), n_samples))
-            + 0.1 * np.random.randn(n_samples)
-        ).reshape(-1, 1)
-    )[:, 0]
-    return df.round(2)
+    df["sensor1"] = _sensor_sample(n_samples=n_samples)
+    df["sensor2"] = _sensor_sample(n_samples=n_samples)
+    df["sensor3"] = _sensor_sample(n_samples=n_samples)
+    return df.round(df_round)
 
 
-def samples(
-    seed: int, n_satellites: int, n_samples: int
-) -> Dict[str, pd.DataFrame]:
+def samples(seed: int, n_satellites: int, n_samples: int) -> Dict[str, pd.DataFrame]:
     """
     Create samples for n 'satellites'
     """
@@ -116,7 +130,7 @@ def write_to_csv(
     Returns a generator of paths.
     """
     if not directory.exists():
-        directory.mkdir()
+        directory.mkdir(parents=True)
         LOGGER.info("Created directory:%s", directory)
     for sat_name, sat_data in samples.items():
         file_path = directory.joinpath(f"{sat_name}.csv")
