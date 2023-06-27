@@ -1,12 +1,12 @@
 # satellite-kafka-spark-delta-lake-pipeline-example
 
-This is an example/demo ("proof of concept") project. It is producer-consumer program with randomly generated data. The premise is that there are `n` satellites that are producing data asynchronously. The data is published to a message broker, then processed and written to storage with an extract-tranform-load (ETL) pipeline.
+This is an example/demo ("proof of concept") project. It is a producer-consumer program with randomly generated data. The premise is that there are multiple satellites producing data asynchronously. The data is published to a message broker, then processed and written to storage with an extract-tranform-load (ETL) pipeline.
 
 ## Architecture
 
 - Sample generation code - Python >3.7 (`pip install -r requirements.txt`)
     - `sample_data.py`
-- Serialization - Flatbuffers
+- Serialization - [FlatBuffers](https://github.com/google/flatbuffers)
 - Producer code - C++17
     - [librdkafka](https://github.com/confluentinc/librdkafka/tree/master)
     - [modern-cpp-kafka](https://github.com/morganstanley/modern-cpp-kafka)
@@ -15,7 +15,7 @@ This is an example/demo ("proof of concept") project. It is producer-consumer pr
 - Consumer code - Scala/Spark and Java
 - Storage: [Delta Table](https://delta.io)
     - Parquet w/ Snappy compression
-- Deployment - Docker and docker compose
+- Deployment - [Docker](https://www.docker.com) and [docker-compose](https://docs.docker.com/compose/)
 - Figures - Python >3.7 (`pip install -r requirements.txt`)
     - `figures.ipynb`
 
