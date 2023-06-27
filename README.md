@@ -25,14 +25,10 @@ The sample data is a python script that creates simulated satellite data.
 
 A "satellite sample" is contained in one csv, so one csv per satellite. The "name" of the satellite is the file name. For example, here is the head of `sat0.csv`.
 
-temp_c,battery_charge_pct,altitude,sensor1,sensor2,sensor3
-
-17.74,54.09,786.75,0.42,0.52,0.47
-
-27.58,44.02,1251.02,0.42,0.51,0.5
-
--8.67,46.33,1270.95,0.5,0.45,0.52
-
+temp_c,battery_charge_pct,altitude,sensor1,sensor2,sensor3<br>
+17.74,54.09,786.75,0.42,0.52,0.47<br>
+27.58,44.02,1251.02,0.42,0.51,0.5<br>
+-8.67,46.33,1270.95,0.5,0.45,0.52<br>
 29.25,47.63,1818.88,0.47,0.49,0.51
 
 There is no index in the files because as the data is pumped through the system a nanosecond time stamp is generated.
