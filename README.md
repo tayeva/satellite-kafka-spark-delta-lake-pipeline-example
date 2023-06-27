@@ -73,3 +73,8 @@ Build the flatbuffers `flatc` binary:
 Run the following script to build the `event.fbs` flatbuffers schema for C++ and Java:
 
 `./build-event-flatbuffers.sh`
+
+
+## Notes on third-party
+
+These git submodules are included for development purposes. They are not necessary deployment.
