@@ -1,3 +1,6 @@
 [submodule "third-party/flatbuffers"]
 	path = third-party/flatbuffers
 	url = git@github.com:google/flatbuffers.git
+[submodule "third-party/modern-cpp-kafka"]
+	path = third-party/modern-cpp-kafka
+	url = git@github.com:morganstanley/modern-cpp-kafka.git
