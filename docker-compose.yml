@@ -58,7 +58,7 @@ services:
     depends_on:
       - event-consumer
     volumes:
-      - ./data/samples/:/app/samples
+      - ./data:/app/data
 
 networks:
   sat-net:

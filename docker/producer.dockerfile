@@ -16,4 +16,4 @@ RUN cd event-producer \
     && cmake .. \   
     && cmake --build .
 
-CMD ["./event-producer/build/producer", "./samples"]
+CMD ["./event-producer/build/producer", "./data/samples"]
