@@ -1,0 +1,65 @@
+version: '3'
+services:
+  sample-data:
+    build:
+      context: .
+      dockerfile: docker/sample-data.dockerfile
+      args:
+        - DOCKER_IGNORE_FILE=docker/sample-data.dockerignore
+    volumes:
+      - ./data:/app/data
+    networks:
+      - sat-net
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    networks:
+      - sat-net
+    environment:
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+    depends_on:
+      - zookeeper
+      - sample-data
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    networks:
+      - sat-net
+    environment:
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_TICK_TIME=2000
+
+  event-consumer:
+    build:
+      context: .
+      dockerfile: docker/event-consumer.dockerfile
+      args:
+        - DOCKER_IGNORE_FILE=docker/event-consumer.dockerignore
+    ports:
+      - 8080:8080
+    networks:
+      - sat-net
+    depends_on:
+      - kafka
+    volumes:
+      - ./data/:/app/data
+    command: sbt "run ./event-consumer.properties"
+
+  event-producer:
+    build:
+      context: .
+      dockerfile: docker/producer.dockerfile
+      args:
+        - DOCKER_IGNORE_FILE=docker/producer.dockerignore
+    networks:
+      - sat-net
+    depends_on:
+      - event-consumer
+    volumes:
+      - ./data/samples/:/app/samples
+
+networks:
+  sat-net:
+    driver: bridge
