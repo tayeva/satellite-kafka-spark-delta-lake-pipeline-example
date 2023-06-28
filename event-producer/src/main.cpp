@@ -1,8 +1,10 @@
 #include "producer/kafka.h"
 #include "producer/utils.h"
 
+#include <chrono>
 #include <iostream>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <kafka/KafkaProducer.h>
@@ -12,6 +14,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Usage: main <directory>" << std::endl;
     return EXIT_FAILURE;
   }
+  std::this_thread::sleep_for(std::chrono::seconds(60));
   std::vector<std::string> files = poc::glob(argv[1], ".csv");
   const std::string brokers = "kafka:9092";
   const kafka::Topic topic = "sat-data";
