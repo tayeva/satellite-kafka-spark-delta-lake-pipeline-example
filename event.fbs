@@ -1,0 +1,14 @@
+namespace event;
+
+table Event {
+  satellite_name: string;
+  timestamp_ns: ulong;
+  temp_c: double;
+  battery_charge_pct: double;
+  altitude_km: double;
+  sensor1: double;
+  sensor2: double;
+  sensor3: double;
+}
+
+root_type Event;
