@@ -1,6 +1,6 @@
 # satellite-kafka-spark-delta-lake-pipeline-example
 
-This is an example/demo ("proof of concept") project. It is a producer-consumer program with randomly generated data. The premise is that there are multiple satellites producing data asynchronously. The data is published to a message broker, then processed and written to storage with an extract-tranform-load (ETL) pipeline.
+This is an example/demo ("proof of concept") project. It is a producer-consumer program with randomly generated data. The premise is that there are multiple satellites producing data asynchronously. The data is serialized and published to a message broker, then processed and written to storage with an extract-tranform-load (ETL) pipeline.
 
 ## Architecture
 
@@ -16,12 +16,13 @@ This is an example/demo ("proof of concept") project. It is a producer-consumer 
 - Storage: [Delta Table](https://delta.io)
     - Parquet w/ Snappy compression
 - Deployment - [Docker](https://www.docker.com) and [docker-compose](https://docs.docker.com/compose/)
-- Figures - Python >3.7 (`pip install -r requirements.txt`)
-    - `figures.ipynb`
+- Figures - Python >3.7 (`pip install -r requirements-notebook.txt`)
+    - `jupyter notebook`
+    - Open `figures.ipynb`
 
 ### Sample data
 
-The sample data is a python script that creates simulated satellite data.
+The sample data is a python script (`./sample_data.py`) that creates simulated satellite data.
 
 A "satellite sample" is contained in one csv, so one csv per satellite. The "name" of the satellite is the file name. For example, here is the head of `sat0.csv`.
 
@@ -77,7 +78,6 @@ Build the flatbuffers `flatc` binary:
 Run the following script to build the `event.fbs` flatbuffers schema for C++ and Java:
 
 `./build-event-flatbuffers.sh`
-
 
 ## Notes on third-party
 
