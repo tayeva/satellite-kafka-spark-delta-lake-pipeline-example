@@ -41,6 +41,8 @@ Fields
 - sensor2
 - sensor3
 
+Writes data to `./data/samples`.
+
 ### Data serialization
 
 The serialization format chosen is Google Flatbuffers. Flatbuffers, are similar to Google Protocol Buffers ("Protobufs"). They have various trade-offs. Flatbuffers tend to be slightly larger (bytes) than Protobufs, but Flatbuffers offers zero-copy deserialization.
@@ -51,7 +53,9 @@ This process is written in C++17. The producer process reads all of the files as
 
 ### Consumer
 
-The consumer process is a Spark streaming process in Scala. It consumes the `sat-data` topic, accumulating the events in micro-batch fashion; collecting events during a periodic window (`5s`). Once the events are collected in an RDD (resilient distributed dataset), the flatbuffers are deserialized (Java) and the received timestamp is collected from Kafka. Using this data a dataframe is created and appended to a Delta Table, storing the structured data as Parquet files with Snappy compression.
+The consumer process utilizes Spark streaming in Scala. It consumes the `sat-data` kafka topic, accumulating the events in micro-batch fashion; collecting events during a periodic window (`5s`). Once the events are collected in an RDD (resilient distributed dataset), the flatbuffers are deserialized (Java flatbuffers) and the received timestamp is collected from Kafka. Using this data, a dataframe is created and appended to a Delta Table, storing the structured data as Parquet files with Snappy compression.
+
+Writes data to `./data/delta-tables/satellite-data-raw`.
 
 ## Deployment
 
