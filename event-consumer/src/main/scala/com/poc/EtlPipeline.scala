@@ -28,7 +28,10 @@ object EtlPipeline {
     if (fs.exists(deltaTablePath)) {
       fs.delete(deltaTablePath, true)
     }
-    val emptyDf: DataFrame = spark.createDataFrame(spark.sparkContext.emptyRDD[Row], Schema.eventSchema)
+    val emptyDf: DataFrame = spark.createDataFrame(
+      spark.sparkContext.emptyRDD[Row],
+      Schema.eventSchema
+    )
     emptyDf.write
       .format("delta")
       .save(path)
@@ -39,27 +42,60 @@ object EtlPipeline {
       .setAppName(appName)
       .setMaster(sparkMaster)
       .set("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
-      .set("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+      .set(
+        "spark.sql.catalog.spark_catalog",
+        "org.apache.spark.sql.delta.catalog.DeltaCatalog"
+      )
     sparkConf
   }
 
-  def processKafkaStream(stream: InputDStream[ConsumerRecord[String,Array[Byte]]], spark: SparkSession, deltaTable: String): Unit = {
+  def processKafkaStream(
+      stream: InputDStream[ConsumerRecord[String, Array[Byte]]],
+      spark: SparkSession,
+      deltaTable: String
+  ): Unit = {
     stream.foreachRDD { rdd =>
       val events = rdd.map(record => {
         val event = deserializeEvent(record.value())
         val receivedTimestamp = record.timestamp()
         (event, receivedTimestamp)
       })
-      val eventFields = events.map {case (event, receivedTimestamp) => 
+      val eventFields = events.map { case (event, receivedTimestamp) =>
         (
-          event.satelliteName(), event.timestampNs(), event.tempC(),
-          event.batteryChargePct(), event.altitudeKm(), event.sensor1(),
-          event.sensor2(), event.sensor3(), receivedTimestamp
+          event.satelliteName(),
+          event.timestampNs(),
+          event.tempC(),
+          event.batteryChargePct(),
+          event.altitudeKm(),
+          event.sensor1(),
+          event.sensor2(),
+          event.sensor3(),
+          receivedTimestamp
         )
       }
       val eventRows = eventFields.map {
-        case (satelliteName, timestampNs, tempC, batteryChargePct, altitudeKm, sensor1, sensor2, sensor3, kafkaTimestamp) =>
-          Row(satelliteName, timestampNs, tempC, batteryChargePct, altitudeKm, sensor1, sensor2, sensor3, kafkaTimestamp)
+        case (
+              satelliteName,
+              timestampNs,
+              tempC,
+              batteryChargePct,
+              altitudeKm,
+              sensor1,
+              sensor2,
+              sensor3,
+              kafkaTimestamp
+            ) =>
+          Row(
+            satelliteName,
+            timestampNs,
+            tempC,
+            batteryChargePct,
+            altitudeKm,
+            sensor1,
+            sensor2,
+            sensor3,
+            kafkaTimestamp
+          )
       }
       val eventsDf = spark.createDataFrame(eventRows, Schema.eventSchema)
       if (!eventsDf.isEmpty) {
@@ -74,11 +110,11 @@ object EtlPipeline {
 }
 
 object Main {
-  def main(args: Array[String]) : Unit = {
+  def main(args: Array[String]): Unit = {
     if (args.length != 1) {
       println("Please provide the path to the properties file.")
       return
-    } 
+    }
     val configFile = args(0)
     val properties = Utils.loadConfig(configFile)
     val client = new KafkaSparkClient(properties)
@@ -86,9 +122,10 @@ object Main {
     val deltaTable = "/app/data/delta-tables/" + deltaTableProperty
     val appName = properties.getProperty("appName")
     val sparkMaster = properties.getProperty("sparkMaster")
-    
+
     val sparkConf = EtlPipeline.getSparkConf(client.appName, client.sparkMaster)
-    val streamingContext = new StreamingContext(sparkConf, Seconds(client.batchWindowSeconds))
+    val streamingContext =
+      new StreamingContext(sparkConf, Seconds(client.batchWindowSeconds))
     val spark = SparkSession.builder.config(sparkConf).getOrCreate()
     import spark.implicits._
 
