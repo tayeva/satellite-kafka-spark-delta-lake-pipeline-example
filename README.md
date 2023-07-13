@@ -2,6 +2,15 @@
 
 This is an example/demo ("proof of concept") project. It is a producer-consumer program with randomly generated data. The premise is that there are multiple satellites producing data asynchronously. The data is serialized and published to a message broker, then processed and written to storage with an extract-tranform-load (ETL) pipeline.
 
+
+https://github.com/tayeva/satellite-kafka-spark-delta-lake-pipeline-example/assets/124453543/e11b0a66-6c50-4edf-8395-fe1b3d66d41f
+
+Delta lake output:
+
+<img width="606" alt="delta-lake-output" src="https://github.com/tayeva/satellite-kafka-spark-delta-lake-pipeline-example/assets/124453543/3ba75b69-7295-42ca-bb57-df8a388dd18b">
+
+
+
 ## Architecture
 
 - Sample generation code - Python >3.7 (`pip install -r requirements.txt`)
